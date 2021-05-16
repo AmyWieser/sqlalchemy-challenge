@@ -114,7 +114,25 @@ def tobs():
     
     return jsonify(most_active_temp)
 
-app.run()
+@app.route("/api/v1.0/<start_date>")
+def Start_date(start_date):
+    # Create list with Min temp, Avg temp & Max temp for a given start date
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    # Query for Min temp, Avg temp & Max temptemperature for the start date
+    start_stats = session.query(func.min(Measurement.date), func.min(Measurement.tobs),\
+        func.avg(Measurement.tobs), func.max(Measurement.tobs)).filter(Measurement.date >= start_date).all()
+    
+    start_stats_list = {"Start Date": start_stats[0][0], "Minimum Temp": start_stats[0][1],\
+        "Maximum Temp": start_stats[0][3], "Average Temp": start_stats[0][2]}
+    session.close()
+     
+    return jsonify(start_stats_list)
+
+    
+if __name__ == "__main__":
+    app.run(debug=True)
 
 
     
